@@ -64,6 +64,18 @@ const prevPage=()=>{
   if(currentPage.value > 1)
   currentPage.value--
 }
+// Helper to render star icons based on rating
+const getStars = (rating: number) => {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return {
+    full: Array(fullStars).fill('★'),
+    half: hasHalfStar ? ['⯨'] : [], // or use '☆' or SVG if you want fancier
+    empty: Array(emptyStars).fill('☆')
+  };
+};
 //filter by Category
 //const categories = computed(()=>{
  // const allcats = data.value.map((p)=> p.category)
@@ -112,7 +124,13 @@ const prevPage=()=>{
          <td>{{p.category}}</td>
          <td>{{p.title}}</td>
         
-         <td>{{p.rating.toFixed(1)}}</td>
+       <td >
+  <span v-for="(star, i) in getStars(p.rating).full" :key="'f'+i" class="star full">{{ star }}</span>
+  <span v-for="(star, i) in getStars(p.rating).half" :key="'h'+i" class="star half">{{ star }}</span>
+  <span v-for="(star, i) in getStars(p.rating).empty" :key="'e'+i" class="star empty">{{ star }}</span>
+  <span class="rating-number">({{ p.rating.toFixed(1) }})</span>
+</td>
+
          <td> €{{p.price}}</td>
          <td><button @click=deleteProducts(p.id)>Delete</button></td>
      </tr>
@@ -141,7 +159,7 @@ const prevPage=()=>{
   text-align:right;
   margin-bottom:1rem;
   position:sticky;
-  z-index: 10;
+
   padding: 0.5rem 0;
 }
 
@@ -197,8 +215,8 @@ const prevPage=()=>{
   overflow:hidden;
   background: #fff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-
  }
+
 
  .product-table th {
   background: #5c6bccff;
@@ -208,11 +226,8 @@ const prevPage=()=>{
   font-weight: 600;
   border-bottom: 2px solid #5c6bccff;
   border-left: 1px solid #949494;
-  border-right: 1px solid #949494;
-  position:sticky;
-  top: 0rem; 
-  z-index: 5;
-}
+ 
+ }
 
 .product-table td {
   padding: 0.7rem;
@@ -327,4 +342,30 @@ const prevPage=()=>{
     gap: 0.5rem;
   }
 }
+
+
+.star {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.star.full {
+  color: #FFD700; /* gold */
+}
+
+.star.half {
+  color: #FFD700;
+  opacity: 0.6; /* subtle difference for half star */
+}
+
+.star.empty {
+  color: #ccc;
+}
+
+.rating-number {
+  margin-left: 4px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
 </style>
