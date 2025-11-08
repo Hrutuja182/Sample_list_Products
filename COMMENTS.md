@@ -63,6 +63,61 @@ Color Category
        •filter-products.test.ts includes a Vitest unit test to ensure filtering logic correctly keeps only items priced ≤ 100.
        •Additional tests (e.g. sorting, deletion) could be added if desired.
 
+ 7. Pagination
+     - Implemented pagination to improve performance on large datasets.
+     - Displays **10 products per page**.
+     - Includes “Previous” and “Next” navigation buttons.
+     - Pagination state preserved when sorting or deleting.
+
+ 8. Lazy Loading (Performance Optimization)
+
+    -Implemented **lazy loading** for product images using the `loading="lazy"` attribute.
+    - This ensures images are only loaded when they become visible in the viewport.
+    - Improves page performance and reduces initial load time, especially on slower networks.
+    - Works seamlessly with both pagination and infinite scrolling.
+    - Added a simple, accessible **loading spinner** to indicate data fetching.
+    - The spinner is visible while products are being downloaded from the API.
+    - Uses pure CSS animation (`@keyframes spin`) for smooth rotation.
+    - Spinner hides automatically once data is loaded.
+
+ ###   Optional 
+
+9. Category Filter dropdown
+
+   - `selectedCategory` holds the selected category from dropdown (default: 'all')  
+   - `categories` computed generates the list of unique categories + 'all'  
+   - `filteredData` computed filters `data` based on `selectedCategory`  
+      - If 'all', returns all products  
+      - Else, returns products matching the selected category  
+   - Pagination (`paginatedData`function) now works on `filteredData` instead of full `data`  (this is main where we are passing filtereddata to show )
+   - `<select>` in template bound with `v-model="selectedCategory"` to switch categories  
+     
+
+
+Future Improvements (Optional Enhancements)
+These are potential next steps if further features or refinements are desired:
+    1.Search Functionality
+      Add a search box to filter products by title or category dynamically.
+
+    2.Responsive Layout
+     Make the table responsive using CSS grid or cards for smaller screen sizes.
+
+    3.Persist Deleted Items
+     Store deleted IDs in localStorage so deleted products remain hidden even after reload.
+
+    4.Enhanced Sorting Options
+     Provide multi-criteria sorting (e.g., by rating, title, or category).
+
+    5.Unit & E2E Testing
+     Add more test coverage for sorting, deletion, and UI rendering using Vitest + Vue Test Utils or Playwright.
+
+    6.Error and Loading States
+     Add loading spinners and better user feedback for failed fetch attempts.
+
+    7.Styling Enhancements
+     Replace plain CSS with TailwindCSS or a design system like Vuetify for cleaner UI consistency.
+
+
 
 
 

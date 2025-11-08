@@ -1,12 +1,12 @@
 #app {
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 0.5rem;
 }
-
 .title {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  position: sticky;
 }
 body{
     background-color: #ded5d5;

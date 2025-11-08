@@ -1,22 +1,27 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref ,computed } from 'vue'
 import { downloadProductList } from './download-product-list'
 import type { Product } from './types'
 import { filterProducts } from './filter-products'
 
 const data = ref<Product[]>([])
 const sortAsc= ref(true)   //toggle sorting value 
+const currentPage = ref(1)
+const itemsPerpage = 10  // show 10 items per page 
+const loading = ref(true) //spinner state
+//const selectedCategory=ref('all')
 
 onMounted(async () => {
+  loading.value=true
 	const alldata = await downloadProductList()
   console.log(alldata)
   data.value = filterProducts(alldata, 100) //filter only products of price <=100
-
+  loading.value= false
 })
 
 const sortByPrice=()=>{
   data.value.sort((a,b)=>(sortAsc.value ? a.price-b.price : b.price-a.price))
-  sortAsc.value != sortAsc.value
+  sortAsc.value = !sortAsc.value
 }
 
 const deleteProducts=(id: number)=>{
@@ -42,42 +47,87 @@ const categoryColor=(category:string): string=>{
   }
   return colors[category] || '#e0e0e0'
 }
+
+// pagination
+const totalPages= computed(()=> Math.ceil(data.value.length / itemsPerpage))
+const paginatedData= computed(()=>{
+  const start =(currentPage.value-1)* itemsPerpage
+  return data.value.slice(start, start + itemsPerpage)
+})
+
+const nextPage=()=>{
+  if(currentPage.value < totalPages.value) 
+    currentPage.value++
+}
+
+const prevPage=()=>{
+  if(currentPage.value > 1)
+  currentPage.value--
+}
+//filter by Category
+//const categories = computed(()=>{
+ // const allcats = data.value.map((p)=> p.category)
+//return['all',...new Set(allcats)]
+//})
+//const filteredData = computed(()=>{
+ // if(selectedCategory.value=== 'all') return data.value
+ // return data.value.filter((p)=>p.category === selectedCategory.value)
+//})
+ //<label for ="category" class="category-label">Filter by Category:</label> 
+ //    <select id="category" v-model="selectedCategory" class="category-select">
+  //    <option v-for="c in categories" :key="c" :value="c">
+   //     {{ c.charAt(0).toUpperCase() +c.slice(1) }}
+   //   </option>
+   //  </select>
 </script>
 
 <template>
   <div class="page-container">
-
-   <div class="controls">   
+  
+   <div class="controls"> 
      <button @click="sortByPrice">Sort By Price </button>
     </div>
- <div class="table-wrapper">
+ 
+    <div v-if="loading" class="spinner-container">
+      <div class="spinner"></div>
+      <p>Loading products...</p>
+    </div>
+ <div  v-else class="table-wrapper">
    <table class="product-table" role="table" aria-label="Product List Table">
      <thead>
       <tr>
-         <th>Thumbnail</th>
          <th>ID</th>
-         <th>Title</th>
+         <th>Thumbnail</th>
          <th>Category</th>
+         <th>Title</th>
          <th>Rating</th>
-         <th>Price</th>
+         <th>Price (in Euros)</th>
          <th>Action</th>
       </tr>
      </thead>
      <tbody>
-     <tr v-for= "p in data" :key="p.id" :style={backgroundColor:categoryColor(p.category)}>
-         <td><img :src="p.thumbnail" alt="Product thumbnail" width="60" height="60"/></td>
+     <tr v-for= "p in paginatedData" :key="p.id" :style={backgroundColor:categoryColor(p.category)}>
          <td>{{p.id}}</td>
-         <td>{{p.title}}</td>
+         <td><img :src="p.thumbnail" alt="Product thumbnail" width="60" height="60" loading="lazy"/></td>
          <td>{{p.category}}</td>
+         <td>{{p.title}}</td>
+        
          <td>{{p.rating.toFixed(1)}}</td>
-         <td>{{p.price}}</td>
+         <td> €{{p.price}}</td>
          <td><button @click=deleteProducts(p.id)>Delete</button></td>
      </tr>
      </tbody>
    </table>
  </div>
-   <div v-if="!data.length" class="empty">
-    Loading or no products found!
+
+   <div v-if="!loading && !data.length" class="empty">
+      No products found!
+   </div>
+
+   <div v-if="!loading && data.length" class ="pagination">
+    <button @click="prevPage" :disabled="currentPage=== 1 ">Previous</button>
+    <span> Page {{ currentPage }} of {{ totalPages }}</span>
+    <button @click="nextPage" :disabled="currentPage=== totalPages ">Next</button>
    </div>
   </div>
 </template>
@@ -90,7 +140,25 @@ const categoryColor=(category:string): string=>{
 .controls{
   text-align:right;
   margin-bottom:1rem;
+  position:sticky;
+  z-index: 10;
+  padding: 0.5rem 0;
 }
+
+/* category select button Css */
+.category-label{
+  margin-right:0.5rem;
+  font-weight: 500;
+}
+
+.category-select{
+  padding:0.4rem 0.6rem;
+  border-radius:6px;
+  border: 1px solid #ccc;
+  margin-right: 1rem;
+  font-size: 0.95rem;
+}
+
 
  button{
   background:#2196f3;
@@ -113,6 +181,15 @@ const categoryColor=(category:string): string=>{
   outline-offset: 2px;
 }
 
+/* Center table and allow horizontal scroll */
+.table-wrapper {
+  display: flex;
+  justify-content: center; /* centers table horizontally */
+  align-items: center;      /* centers vertically if height allows */
+  width: 100%;
+
+  -webkit-overflow-scrolling: touch;
+}
  .product-table{
   width:100%;
   border-collapse:collapse;
@@ -130,6 +207,9 @@ const categoryColor=(category:string): string=>{
   padding: 0.75rem;
   font-weight: 600;
   border-bottom: 2px solid #5c6bccff;
+  position:sticky;
+  top: 0rem; 
+  z-index: 5;
 }
 
 .product-table td {
@@ -137,6 +217,7 @@ const categoryColor=(category:string): string=>{
   border-bottom: 1px solid #ddd;
   text-align: center;
   vertical-align: middle;
+  
 }
 
 .product-table tr:hover {
@@ -156,18 +237,47 @@ const categoryColor=(category:string): string=>{
   margin-top:1.5rem;
  }
 
- /* Center table and allow horizontal scroll */
-.table-wrapper {
-  display: flex;
-  justify-content: center; /* centers table horizontally */
-  align-items: center;      /* centers vertically if height allows */
-  width: 100%;
+ /*Pagination Bar*/
+ .pagination{
+  margin-top : 1rem;
+  text-align:center;
+  display:flex;
+  justify-content: center;
+  gap : 1rem;
+  align-items: center;
+  position: sticky;
+ }
 
-  -webkit-overflow-scrolling: touch;
+ .pagination span{
+  font-weight: 500;
+  color: #333;
+ }
+
+ /* Spinner */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #3949ab;
 }
 
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #cfd8dc;
+  border-top-color: #3949ab;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
 
-
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @media (max-width: 768px) {
   .page-container {
