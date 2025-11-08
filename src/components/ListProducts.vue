@@ -192,7 +192,7 @@ const prevPage=()=>{
 }
  .product-table{
   width:100%;
-  border-collapse:collapse;
+  border-collapse: collapse;
   border-radius:12px;
   overflow:hidden;
   background: #fff;
@@ -207,6 +207,8 @@ const prevPage=()=>{
   padding: 0.75rem;
   font-weight: 600;
   border-bottom: 2px solid #5c6bccff;
+  border-left: 1px solid #949494;
+  border-right: 1px solid #949494;
   position:sticky;
   top: 0rem; 
   z-index: 5;
@@ -214,7 +216,7 @@ const prevPage=()=>{
 
 .product-table td {
   padding: 0.7rem;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #949494;
   text-align: center;
   vertical-align: middle;
   

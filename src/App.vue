@@ -4,7 +4,7 @@ import ListProducts from './components/ListProducts.vue'
 
 <template>
   <div id="app">
-  <h1 class="title">Product List </h1>
+  <h1 class="title">PRODUCT LIST </h1>
   <ListProducts />
   </div>
 </template>
