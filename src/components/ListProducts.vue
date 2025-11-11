@@ -9,7 +9,7 @@ const sortAsc= ref(true)   //toggle sorting value
 const currentPage = ref(1)
 const itemsPerpage = 10  // show 10 items per page 
 const loading = ref(true) //spinner state
-//const selectedCategory=ref('all')
+const selectedCategory=ref('all')
 
 onMounted(async () => {
   loading.value=true
@@ -49,10 +49,10 @@ const categoryColor=(category:string): string=>{
 }
 
 // pagination
-const totalPages= computed(()=> Math.ceil(data.value.length / itemsPerpage))
+const totalPages= computed(()=> Math.ceil(filteredData.value.length / itemsPerpage))
 const paginatedData= computed(()=>{
   const start =(currentPage.value-1)* itemsPerpage
-  return data.value.slice(start, start + itemsPerpage)
+  return filteredData.value.slice(start, start + itemsPerpage)
 })
 
 const nextPage=()=>{
@@ -72,31 +72,32 @@ const getStars = (rating: number) => {
 
   return {
     full: Array(fullStars).fill('★'),
-    half: hasHalfStar ? ['⯨'] : [], // or use '☆' or SVG if you want fancier
+    half: hasHalfStar ? ['⯨'] : [], 
     empty: Array(emptyStars).fill('☆')
   };
 };
 //filter by Category
-//const categories = computed(()=>{
- // const allcats = data.value.map((p)=> p.category)
-//return['all',...new Set(allcats)]
-//})
-//const filteredData = computed(()=>{
- // if(selectedCategory.value=== 'all') return data.value
- // return data.value.filter((p)=>p.category === selectedCategory.value)
-//})
- //<label for ="category" class="category-label">Filter by Category:</label> 
- //    <select id="category" v-model="selectedCategory" class="category-select">
-  //    <option v-for="c in categories" :key="c" :value="c">
-   //     {{ c.charAt(0).toUpperCase() +c.slice(1) }}
-   //   </option>
-   //  </select>
+const categories = computed(()=>{
+ const allcats = data.value.map((p)=> p.category)
+  return['all',...new Set(allcats)]
+ })
+const filteredData = computed(()=>{
+  if(selectedCategory.value=== 'all') return data.value
+  return data.value.filter((p)=>p.category === selectedCategory.value)
+ })
+ 
 </script>
 
 <template>
   <div class="page-container">
   
    <div class="controls"> 
+       <label for ="category" class="category-label">Filter by Category:</label> 
+       <select id="category" v-model="selectedCategory" class="category-select">
+         <option v-for="c in categories" :key="c" :value="c">
+           {{ c.charAt(0).toUpperCase() +c.slice(1) }}
+         </option>
+       </select>
      <button @click="sortByPrice">Sort By Price </button>
     </div>
  
@@ -123,14 +124,12 @@ const getStars = (rating: number) => {
          <td><img :src="p.thumbnail" alt="Product thumbnail" width="60" height="60" loading="lazy"/></td>
          <td>{{p.category}}</td>
          <td>{{p.title}}</td>
-        
-       <td >
-  <span v-for="(star, i) in getStars(p.rating).full" :key="'f'+i" class="star full">{{ star }}</span>
-  <span v-for="(star, i) in getStars(p.rating).half" :key="'h'+i" class="star half">{{ star }}</span>
-  <span v-for="(star, i) in getStars(p.rating).empty" :key="'e'+i" class="star empty">{{ star }}</span>
-  <span class="rating-number">({{ p.rating.toFixed(1) }})</span>
-</td>
-
+         <td>
+           <span v-for="(star, i) in getStars(p.rating).full" :key="'f'+i" class="star full">{{ star }}</span>
+           <span v-for="(star, i) in getStars(p.rating).half" :key="'h'+i" class="star half">{{ star }}</span>
+           <span v-for="(star, i) in getStars(p.rating).empty" :key="'e'+i" class="star empty">{{ star }}</span>
+           <span class="rating-number">({{ p.rating.toFixed(1) }})</span>
+        </td>
          <td> €{{p.price}}</td>
          <td><button @click=deleteProducts(p.id)>Delete</button></td>
      </tr>
